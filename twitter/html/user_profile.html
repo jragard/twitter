@@ -1,7 +1,20 @@
 <a href="/"><button type="button">Home</button></a>
 
-<h1>{{ user }}'s Profile</h1>
 
+<h1>@{{ user }}'s Profile</h1>
+<h3>@{{ user }} has tweeted {{ tweet_count }} times</h3>
+<h3>@{{ user }} is following {{ following_count }} accounts</h3>
+
+<ul>
+    {% for user in target_following %}
+        <li>
+            <a href="/{{ user }}">@{{ user }}</a>
+            <br>
+        </li>
+    {% endfor %}
+</ul>
+
+<h1>@{{ user }}'s Tweets</h1>
 <ul>
     {% for tweet in tweets %}
         <li>
@@ -16,5 +29,9 @@
 <form action="/{{ user }}" method="post">
     {% csrf_token %}
     <input type="hidden" value="{{ user.id }}" name="user_id">
-    <input type="submit" value="Follow">
+    {% if user_string not in following %}
+        <a href="/{{ user }}"><input type="submit" value="Follow"></a>
+    {% else %}
+        <a href="/{{ user }}"><input type="submit" value="Unfollow"></a>
+    {% endif %}
 </form>

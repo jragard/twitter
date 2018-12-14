@@ -23,9 +23,8 @@ def signup_view(request):
             username=data['username'],
             user=user,
         )
-        # print(user)
+       
         login(request, user)
-        # login(request, twitter_user)
 
         return HttpResponseRedirect(reverse('homepage'))
 
@@ -50,6 +49,25 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('homepage'))
 
+def notifications_view(request):
+    logged_in_user = TwitterUser.objects.filter(username=request.user).first()
+    results = Tweet.objects.all()
+
+    notifications = []
+    mention = '@' + logged_in_user.username
+    notifications.clear()
+
+    for tweet in results:
+        if mention in tweet.body and tweet.viewed is False:
+            tweet.viewed = True
+            tweet.save()
+            notifications.append(tweet)
+            
+
+    return render(request, 'notifications.html', {'notifications': notifications,
+                                                  'notifications_length': len(notifications),})
+
+    
 
 def home_view(request):
     twitter_users = TwitterUser.objects.all()
@@ -57,30 +75,37 @@ def home_view(request):
     following_list = []
     username_following_list = []
 
-    for x in logged_in_user.following.all():
-        following_list.append(x.id)
-    # print(following_list)
+    if logged_in_user is not None:
+        for x in logged_in_user.following.all():
+            following_list.append(x.id)
 
-    for x in twitter_users:
-        if x.id in following_list:
-            # print(x)
-            username_following_list.append(x)
-        
+        for x in twitter_users:
+            if x.id in following_list:
+                username_following_list.append(x)
 
-    results = Tweet.objects.all()
-    final_results = []
+        results = Tweet.objects.all()
 
-    for x in results:
-        if x.twitter_user in username_following_list:
-            print(x.twitter_user)
-            print(x.body)
-            final_results.append(x)
+        notifications = []
+        mention = '@' + logged_in_user.username
+        notifications.clear()
 
-    print(final_results)
+        for tweet in results:
+            if mention in tweet.body and tweet.viewed is False:
+                notifications.append(tweet)
+            
+
+        final_results = []
+
+        for x in results:
+            if x.twitter_user in username_following_list or x.twitter_user == logged_in_user:
+                final_results.append(x)
+
     is_logged_in = request.user.is_authenticated
     
     if is_logged_in:
-        return render(request, 'homepage.html', {'data': final_results})
+        return render(request, 'homepage.html', {'data': final_results,
+                                                 'notifications': notifications,
+                                                 'notification_length': len(notifications),})
     else:
         return redirect('login/', permananent=False)
 
@@ -91,33 +116,41 @@ def individual_tweet_view(request, tweet_pk):
 def user_profile_view(request, user):
 
     logged_in_user = TwitterUser.objects.filter(username=request.user).first()
-    print(logged_in_user)
+    logged_in_user_following = []
 
-    if request.method == 'POST':
-        print(request.POST['user_id'])
-        targeted_user = TwitterUser.objects.filter(id=request.POST['user_id']).first()
-        print(targeted_user)
-        logged_in_user.following.add(targeted_user)
-        print(logged_in_user.following.all())
+    for x in logged_in_user.following.all():
+        logged_in_user_following.append(x.username)
     
-
-
+    if request.method == 'POST':
+        targeted_user = TwitterUser.objects.filter(id=request.POST['user_id']).first()
+        
+        if str(targeted_user) not in logged_in_user_following:
+            logged_in_user.following.add(targeted_user)
+        else:
+            logged_in_user.following.remove(targeted_user)
+    
     filtered_result = TwitterUser.objects.all().filter(username=user).first()
     filtered_tweets = Tweet.objects.all().filter(twitter_user=filtered_result)
+
+    target_user_following = []
+
+    for x in filtered_result.following.all():
+        target_user_following.append(x.username)
     
     return render(request, 'user_profile.html', {'user': filtered_result,
-                                                 'tweets': filtered_tweets})
+                                                 'user_string': str(filtered_result),
+                                                 'tweets': filtered_tweets,
+                                                 'logged_in_user': logged_in_user,
+                                                 'following': logged_in_user_following,
+                                                 'tweet_count': len(filtered_tweets),
+                                                 'following_count': len(target_user_following),
+                                                 'target_following': target_user_following,
+                                                 })
 
 def compose_view(request):
     html = 'compose.html'
     form = AddTweet(None or request.POST)
-    print(request.user.id)
-    # print(TwitterUser.objects.all())
-    # print(User.objects.all())
-    # for x in TwitterUser.objects.all():
-        # print(x.id)
-        # print (x.username)
-        
+    
     x = datetime.datetime.now()
 
     if form.is_valid():
@@ -125,7 +158,8 @@ def compose_view(request):
         tweet = Tweet.objects.create(
             body=data['body'],
             twitter_user=TwitterUser.objects.filter(id=request.user.id).first(),
-            date_time=x.strftime("%b") + " " + str(x.day) + ", " + str(x.year) + ", " + str(x.strftime("%I")) + ":" + str(x.strftime("%M")) + " " + x.strftime("%p")
+            date_time=x.strftime("%b") + " " + str(x.day) + ", " + str(x.year) + ", " + str(x.strftime("%I")) + ":" + str(x.strftime("%M")) + " " + x.strftime("%p"),
+            viewed=False
         )
         return render(request, 'success.html')
     else:

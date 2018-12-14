@@ -15,6 +15,7 @@ class Tweet(models.Model):
     body = models.CharField(max_length=140)
     twitter_user = models.ForeignKey(TwitterUser, on_delete=models.CASCADE)
     date_time = models.CharField(max_length=25)
+    viewed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.body
