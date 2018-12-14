@@ -8,3 +8,6 @@ class SignupForm(forms.Form):
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=40)
     password = forms.CharField(widget=forms.PasswordInput())
+
+class AddTweet(forms.Form):
+    body = forms.CharField(max_length=140)

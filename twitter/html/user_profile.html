@@ -1,0 +1,20 @@
+<a href="/"><button type="button">Home</button></a>
+
+<h1>{{ user }}'s Profile</h1>
+
+<ul>
+    {% for tweet in tweets %}
+        <li>
+            {{ tweet.body }}
+            <br>
+            <br>
+        </li>
+
+    {% endfor %}
+</ul>
+
+<form action="/{{ user }}" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="{{ user.id }}" name="user_id">
+    <input type="submit" value="Follow">
+</form>

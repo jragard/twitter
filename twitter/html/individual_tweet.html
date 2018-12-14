@@ -1,0 +1,16 @@
+<a href="/"><button type="button">Home</button></a>
+{% if request.user.is_authenticated %}
+    <a href="compose/"><button type="button">Tweet</button></a>
+    <button type="button">Notifications</button>
+    <button type="button">My Profile</button>
+{% endif %}
+{% if request.user.is_authenticated %}
+    <a href="/logout"><button type="button">Log Out</button></a>
+{% else %}
+    <a href="/login"><button type="button">Log In</button></a>
+    <a href="/signup"><button type="button">Sign Up</button></a>
+{% endif %}
+
+<h1>{{ data.twitter_user }}</h1>
+<h4>{{ data.date_time }}</h4>
+<h2>{{ data.body }}</h2>
