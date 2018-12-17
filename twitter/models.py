@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class TwitterUser(models.Model):
+    # Subclass of django user
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     username = models.CharField(max_length=12)
     following = models.ManyToManyField('self')
@@ -19,3 +19,8 @@ class Tweet(models.Model):
 
     def __str__(self):
         return self.body
+
+
+class Notification(models.Model):
+    pass
+

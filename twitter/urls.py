@@ -15,10 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from twitter.views import (home_view, signup_view, login_view, compose_view,
-                           logout_view, individual_tweet_view,
-                           user_profile_view, notifications_view)
+from twitter.views import home_view, signup_view, login_view, compose_view, logout_view, individual_tweet_view, user_profile_view, notifications_view
 from twitter.models import TwitterUser, Tweet
+from django.contrib.auth.models import User
 
 admin.site.register(TwitterUser)
 admin.site.register(Tweet)
