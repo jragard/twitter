@@ -15,11 +15,12 @@ def signup_view(request):
     if form.is_valid():
         
         data = form.cleaned_data
+        
         user = User.objects.create_user(
             data['username'], data['email'], data['password']
         )
         
-        twitter_user = TwitterUser.objects.create(
+        TwitterUser.objects.create(
             username=data['username'],
             user=user,
         )
@@ -29,6 +30,7 @@ def signup_view(request):
         return HttpResponseRedirect(reverse('homepage'))
 
     return render(request, html, {'form': form})
+
 
 def login_view(request):
     html = 'login.html'
@@ -45,9 +47,11 @@ def login_view(request):
 
     return render(request, html, {'form': form})
 
+
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('homepage'))
+
 
 def notifications_view(request):
     logged_in_user = TwitterUser.objects.filter(username=request.user).first()
@@ -103,23 +107,26 @@ def home_view(request):
     is_logged_in = request.user.is_authenticated
     
     if is_logged_in:
-        return render(request, 'homepage.html', {'data': final_results,
+        return render(request, 'homepage.html', {'data': reversed(final_results),
                                                  'notifications': notifications,
                                                  'notification_length': len(notifications),})
     else:
         return redirect('login/', permananent=False)
 
+
 def individual_tweet_view(request, tweet_pk):
     filtered_result = Tweet.objects.all().filter(id=tweet_pk)[0]
     return render(request, 'individual_tweet.html', {'data': filtered_result})
+
 
 def user_profile_view(request, user):
 
     logged_in_user = TwitterUser.objects.filter(username=request.user).first()
     logged_in_user_following = []
 
-    for x in logged_in_user.following.all():
-        logged_in_user_following.append(x.username)
+    if logged_in_user is not None:
+        for x in logged_in_user.following.all():
+            logged_in_user_following.append(x.username)
     
     if request.method == 'POST':
         targeted_user = TwitterUser.objects.filter(id=request.POST['user_id']).first()
@@ -155,7 +162,7 @@ def compose_view(request):
 
     if form.is_valid():
         data = form.cleaned_data
-        tweet = Tweet.objects.create(
+        Tweet.objects.create(
             body=data['body'],
             twitter_user=TwitterUser.objects.filter(id=request.user.id).first(),
             date_time=x.strftime("%b") + " " + str(x.day) + ", " + str(x.year) + ", " + str(x.strftime("%I")) + ":" + str(x.strftime("%M")) + " " + x.strftime("%p"),

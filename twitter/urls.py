@@ -28,8 +28,8 @@ urlpatterns = [
     path('signup/', signup_view),
     path('login/', login_view),
     path('compose/', compose_view),
-    path('logout/', logout_view),
-    path('<int:tweet_pk>', individual_tweet_view),
-    path('<slug:user>', user_profile_view),
     path('notifications/', notifications_view),
+    path('user/logout/', logout_view),
+    path('<int:tweet_pk>/', individual_tweet_view),
+    path('<slug:user>/', user_profile_view),
 ]

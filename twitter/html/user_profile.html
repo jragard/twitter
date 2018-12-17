@@ -26,12 +26,14 @@
     {% endfor %}
 </ul>
 
-<form action="/{{ user }}" method="post">
+{% if logged_in_user is not None %}
+<form action="/{{ user }}/" method="post">
     {% csrf_token %}
     <input type="hidden" value="{{ user.id }}" name="user_id">
     {% if user_string not in following %}
-        <a href="/{{ user }}"><input type="submit" value="Follow"></a>
+        <a href="/{{ user }}/"><input type="submit" value="Follow"></a>
     {% else %}
-        <a href="/{{ user }}"><input type="submit" value="Unfollow"></a>
+        <a href="/{{ user }}/"><input type="submit" value="Unfollow"></a>
     {% endif %}
 </form>
+{% endif %}
